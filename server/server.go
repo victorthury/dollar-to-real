@@ -74,12 +74,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	cotacao, err := getDollarToRealCotation()
 	if err != nil {
-		log.Println("Tempo excedeu os 200ms")
 		log.Println(err)
 		return
 	}
 
-	insertCotation(cotacao)
+	err = insertCotation(cotacao)
+	if err != nil {
+		log.Println(err)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cotacao)
@@ -100,7 +103,7 @@ func insertCotation(c *EconomiaUsdBrl) error {
 	tx := db.WithContext(ctx)
 	err = tx.Create(c.UsdBrl).Error
 	if err != nil {
-		log.Println("Tempo para criar o registro da cotação excedeu os 10ms")
+		return err
 	}
 
 	return nil
